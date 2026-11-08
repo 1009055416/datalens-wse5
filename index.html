@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="design-suite-artifact-kind" content="website">
+<meta name="design-suite-delivery-adapter" content="static-export">
+<meta name="design-suite-delivery-format" content="single-html">
+<meta name="design-suite-asset-policy" content="inline-base64">
+<meta name="design-suite-export-mode" content="single-file">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>数据透镜 DataLens · 本地数据分析工作台</title>
+<style>
+  :root{
+    --bg:#070b14;
+    --surface-1:#0d1424;
+    --surface-2:#131c31;
+    --surface-3:#1a2540;
+    --rail:#0a1120;
+    --border:#22304d;
+    --border-2:#2c3d5e;
+    --text:#e8eefb;
+    --text-2:#a9b8d0;
+    --text-3:#8fa1be;
+    --accent:#22d3ee;
+    --accent-strong:#0891b2;
+    --accent-soft:rgba(34,211,238,.14);
+    --amber:#f5a524;
+    --amber-soft:rgba(245,165,36,.14);
+    --pos:#34d399;
+    --neg:#ff6b6b;
+    --radius-card:8px;
+    --radius-ctl:6px;
+    --radius-chip:5px;
+    --font-sans:system-ui,-apple-system,"Segoe UI","Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;
+    --font-mono:ui-monospace,"Cascadia Mono","SFMono-Regular",Consolas,Menlo,"Courier New",monospace;
+    --rail-w:248px;
+    --ease:160ms ease;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-sans);
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(rgba(34,211,238,.035) 1px, transparent 1px),linear-gradient(90deg, rgba(34,211,238,.035) 1px, transparent 1px);
+    background-size:88px 88px;
+  }
+  .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
+  .micro{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-family:var(--font-mono);color:var(--text-3);}
+  button{font:inherit;color:inherit;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+  ::selection{background:var(--accent-soft);}
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    position:sticky;top:0;z-index:30;
+    display:flex;align-items:center;gap:18px;
+    padding:12px 20px;
+    background:rgba(7,11,20,.92);
+    border-bottom:1px solid var(--border);
+    backdrop-filter:blur(6px);
+  }
+  .brand{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+  .brand-mark{
+    width:26px;height:26px;border-radius:var(--radius-ctl);
+    display:grid;place-items:center;
+    background:linear-gradient(140deg,var(--accent),var(--accent-strong));
+    color:#04202b;font-weight:800;font-size:14px;
+  }
+  .brand-name{font-weight:760;font-size:16px;letter-spacing:.01em;white-space:nowrap;}
+  .brand-name b{color:var(--accent);font-weight:760;}
+  .brand-sub{font-family:var(--font-mono);font-size:11px;color:var(--text-3);letter-spacing:.08em;}
+  .ds-block{display:flex;align-items:baseline;gap:10px;min-width:0;flex:1 1 auto;}
+  .ds-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;}
+  .ds-shape{font-size:12px;color:var(--text-3);white-space:nowrap;}
+  .actions{display:flex;align-items:center;gap:10px;flex:0 0 auto;margin-left:auto;}
+  .sample-group{display:flex;align-items:center;gap:8px;}
+  .sample-label{font-size:11px;letter-spacing:.06em;color:var(--text-3);font-family:var(--font-mono);text-transform:uppercase;}
+  .seg{
+    display:inline-flex;align-items:center;gap:2px;
+    padding:3px;border-radius:var(--radius-card);
+    background:#141b2c;border:1px solid var(--border);
+  }
+  .seg-btn{
+    border:0;background:transparent;color:var(--text-2);
+    height:28px;padding:0 10px;border-radius:var(--radius-chip);
+    font-size:12.5px;cursor:pointer;white-space:nowrap;
+    transition:background var(--ease),color var(--ease);
+  }
+  .seg-btn:hover{background:var(--surface-3);color:var(--text);}
+  .seg-btn[aria-pressed="true"]{background:var(--surface-3);color:#fff;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.35);}
+  .seg-btn[aria-pressed="true"]::before{
+    content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+    background:var(--accent);margin-right:7px;vertical-align:1px;
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    height:34px;padding:0 14px;border-radius:var(--radius-ctl);
+    border:1px solid transparent;background:var(--surface-3);color:var(--text);
+    font-size:13px;font-weight:500;cursor:pointer;
+    transition:background var(--ease),color var(--ease),border-color var(--ease);
+    white-space:nowrap;
+  }
+  .btn:hover{background:#233252;}
+  .btn:active{background:#1b2946;}
+  .btn.primary{background:var(--accent);color:#03222b;}
+  .btn.primary:hover{background:#5ee7f7;}
+  .btn.primary:active{background:var(--accent-strong);}
+  .btn.ghost{background:transparent;border-color:var(--border-2);color:var(--text-2);}
+  .btn.ghost:hover{background:var(--surface-2);color:var(--text);}
+  .btn[disabled]{opacity:.45;cursor:not-allowed;}
+
+  /* ---------- KPI ---------- */
+  .kpi-strip{
+    display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:12px;padding:14px 20px 4px;
+  }
+  .kpi{
+    background:var(--surface-1);border:1px solid var(--border);
+    border-radius:var(--radius-card);padding:12px 14px;
+    position:relative;overflow:hidden;
+  }
+  .kpi::after{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:var(--border-2);}
+  .kpi.is-accent::after{background:var(--accent);}
+  .kpi.is-amber::after{background:var(--amber);}
+  .kpi-label{font-size:12px;color:var(--text-2);}
+  .kpi-value{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;line-height:1.25;margin-top:2px;}
+  .kpi-value .unit{font-size:13px;font-weight:500;color:var(--text-3);margin-left:3px;}
+  .kpi-sub{font-family:var(--font-mono);font-size:11px;color:var(--text-3);margin-top:2px;}
+
+  /* ---------- workspace ---------- */
+  .workspace{display:flex;align-items:flex-start;gap:0;padding:8px 0 0;}
+  .field-rail{
+    flex:0 0 var(--rail-w);width:var(--rail-w);
+    position:sticky;top:59px;align-self:flex-start;
+    max-height:calc(100vh - 67px);
+    background:var(--rail);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;
+  }
+  .rail-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 16px 8px;border-bottom:1px solid var(--border);
+  }
+  .rail-head span:first-child{font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-family:var(--font-mono);color:var(--text-3);}
+  .rail-head .mono{font-size:12px;color:var(--accent);}
+  .field-list{list-style:none;margin:0;padding:8px;overflow:auto;flex:1 1 auto;}
+  .field-item{
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+    border:1px solid transparent;background:transparent;color:var(--text-2);
+    padding:8px 10px;border-radius:var(--radius-ctl);cursor:pointer;
+    transition:background var(--ease),color var(--ease),border-color var(--ease);
+  }
+  .field-item:hover{background:var(--surface-2);color:var(--text);}
+  .field-item[aria-current="true"]{background:var(--accent-soft);border-color:var(--border-2);color:var(--text);}
+  .type-dot{width:8px;height:8px;border-radius:2px;flex:0 0 auto;}
+  .t-number{background:var(--accent);}
+  .t-category{background:var(--amber);}
+  .t-date{background:#7c9cf5;}
+  .t-text{background:#64748b;}
+  .field-name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;}
+  .field-meta{font-family:var(--font-mono);font-size:11px;color:var(--text-3);flex:0 0 auto;}
+  .field-meta .miss{color:var(--amber);}
+  .rail-note{
+    margin:0;padding:10px 14px 12px;border-top:1px solid var(--border);
+    font-size:11px;line-height:1.55;color:var(--text-3);
+    display:flex;gap:7px;align-items:flex-start;
+  }
+  .rail-note b{color:var(--accent);font-weight:600;}
+
+  .content{flex:1 1 auto;min-width:0;padding:0 20px 40px;}
+  .tabs{
+    display:flex;gap:4px;margin:10px 0 14px;
+    border-bottom:1px solid var(--border);
+  }
+  .tab{
+    border:0;background:transparent;color:var(--text-2);
+    padding:9px 14px;border-bottom:2px solid transparent;
+    font-size:13.5px;cursor:pointer;border-radius:var(--radius-ctl) var(--radius-ctl) 0 0;
+    transition:color var(--ease),border-color var(--ease),background var(--ease);
+  }
+  .tab:hover{color:var(--text);background:var(--surface-1);}
+  .tab[aria-selected="true"]{color:var(--text);font-weight:600;border-bottom-color:var(--accent);}
+  .tab .count{font-family:var(--font-mono);font-size:11px;color:var(--text-3);margin-left:6px;}
+
+  .panel{
+    background:var(--surface-1);border:1px solid var(--border);
+    border-radius:var(--radius-card);padding:14px 16px;margin-bottom:12px;
+  }
+  .panel-head{display:flex;align-items:flex-start;gap:12px;justify-content:space-between;margin-bottom:10px;}
+  .panel-title{font-size:13.5px;font-weight:600;}
+  .panel-note{font-size:12px;color:var(--text-3);margin-top:2px;}
+  .panel-tools{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  select.mini{
+    height:30px;max-width:200px;border-radius:var(--radius-ctl);
+    background:var(--surface-3);border:1px solid var(--border-2);color:var(--text);
+    font-size:12.5px;padding:0 8px;font-family:var(--font-sans);
+  }
+  .chart-wrap{position:relative;}
+  canvas.chart{display:block;width:100%;height:220px;}
+  .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+
+  .kpi-mini-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+  .mini-stat{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-card);padding:10px 12px;}
+  .mini-stat .v{font-family:var(--font-mono);font-size:19px;font-weight:700;}
+  .mini-stat .k{font-size:12px;color:var(--text-2);margin-top:1px;}
+  .mini-stat .s{font-family:var(--font-mono);font-size:11px;color:var(--text-3);}
+
+  .insight{
+    display:flex;gap:12px;padding:11px 12px;border-radius:var(--radius-card);
+    background:var(--surface-2);border:1px solid var(--border);margin-bottom:8px;
+    border-left:3px solid var(--border-2);
+  }
+  .insight.lv-info{border-left-color:var(--accent);}
+  .insight.lv-notice{border-left-color:var(--amber);}
+  .insight.lv-warn{border-left-color:var(--neg);}
+  .insight-badge{
+    flex:0 0 auto;align-self:flex-start;font-family:var(--font-mono);font-size:11px;
+    padding:2px 7px;border-radius:var(--radius-chip);border:1px solid var(--border-2);color:var(--text-2);
+  }
+  .lv-info .insight-badge{color:var(--accent);border-color:rgba(34,211,238,.35);background:var(--accent-soft);}
+  .lv-notice .insight-badge{color:var(--amber);border-color:rgba(245,165,36,.35);background:var(--amber-soft);}
+  .lv-warn .insight-badge{color:var(--neg);border-color:rgba(255,107,107,.35);background:rgba(255,107,107,.12);}
+  .insight h4{margin:0 0 3px;font-size:13.5px;font-weight:600;}
+  .insight p{margin:0;font-size:13px;color:var(--text-2);}
+
+  .table-scroll{overflow:auto;max-height:60vh;border:1px solid var(--border);border-radius:var(--radius-card);}
+  table.data-table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:520px;}
+  table.data-table th, table.data-table td{padding:7px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border);}
+  table.data-table thead th{position:sticky;top:0;background:var(--surface-3);z-index:2;font-family:var(--font-mono);font-size:11.5px;font-weight:600;color:var(--text-2);}
+  table.data-table tbody tr:hover{background:var(--surface-2);}
+  table.data-table td.num{font-family:var(--font-mono);text-align:right;font-variant-numeric:tabular-nums;}
+  table.data-table td.missing{color:var(--amber);font-family:var(--font-mono);font-style:normal;}
+  .th-badge{display:inline-block;margin-left:6px;font-size:10px;padding:1px 5px;border-radius:4px;border:1px solid var(--border-2);color:var(--text-3);font-family:var(--font-mono);}
+  .cell-chip{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px;border-radius:var(--radius-chip);border:1px solid var(--border-2);background:var(--surface-3);}
+
+  pre.report{
+    margin:0;padding:12px;max-height:50vh;overflow:auto;background:var(--bg);
+    border:1px solid var(--border);border-radius:var(--radius-card);
+    font-family:var(--font-mono);font-size:12px;color:var(--text-2);white-space:pre-wrap;word-break:break-word;
+  }
+
+  .tooltip{
+    position:fixed;z-index:60;pointer-events:none;opacity:0;
+    transform:translate(-50%,-120%);transition:opacity 120ms ease;
+    background:rgba(9,14,25,.97);border:1px solid var(--border-2);
+    border-radius:var(--radius-ctl);padding:7px 10px;
+    font-size:12px;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.5);
+    max-width:260px;
+  }
+  .tooltip.on{opacity:1;}
+  .tooltip .tv{font-family:var(--font-mono);font-weight:700;color:var(--accent);}
+
+  .toast-wrap{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;flex-direction:column;gap:8px;}
+  .toast{
+    background:var(--surface-3);border:1px solid var(--border-2);border-left:3px solid var(--accent);
+    border-radius:var(--radius-card);padding:10px 14px;font-size:13px;color:var(--text);
+    box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:340px;
+    animation:slideIn 200ms ease;
+  }
+  @keyframes slideIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  .empty{padding:34px 16px;text-align:center;color:var(--text-3);font-size:13px;}
+  .section-title{font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-family:var(--font-mono);color:var(--text-3);margin:18px 0 8px;}
+
+  .focus-note{
+    display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:8px 12px;
+    border-radius:var(--radius-card);background:var(--accent-soft);border:1px solid var(--border-2);
+    font-size:12.5px;color:var(--text-2);
+  }
+  .focus-note b{color:var(--text);font-weight:600;}
+
+  @media (max-width:1180px){
+    .kpi-strip{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .grid-2{grid-template-columns:minmax(0,1fr);}
+  }
+  @media (max-width:900px){
+    .masthead{flex-wrap:wrap;gap:10px;}
+    .ds-block{order:3;flex-basis:100%;}
+    .actions{order:2;}
+    .sample-label{display:none;}
+    .workspace{flex-direction:column;}
+    .field-rail{
+      position:static;width:100%;flex:1 1 auto;max-height:none;
+      border-right:0;border-bottom:1px solid var(--border);
+    }
+    .field-list{display:flex;gap:8px;overflow-x:auto;max-height:none;padding:10px;}
+    .field-item{width:auto;flex:0 0 auto;}
+    .rail-note{display:none;}
+    .content{padding:0 14px 30px;}
+    .kpi-strip{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 14px 4px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important;}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#workspace" style="position:absolute;left:-9999px;">跳到主要内容</a>
+<header class="masthead">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">◇</span>
+    <span class="brand-name">数据透镜 <b>DataLens</b></span>
+  </div>
+  <div class="ds-block">
+    <span class="ds-name" id="ds-name">未载入数据</span>
+    <span class="ds-shape mono" id="ds-shape">—</span>
+    <span class="ds-shape mono" id="ds-enc"></span>
+  </div>
+  <div class="actions">
+    <div class="sample-group">
+      <span class="sample-label">示例数据</span>
+      <div class="seg" id="sample-seg" role="group" aria-label="载入内置示例数据">
+        <button class="seg-btn" type="button" data-sample="grades" aria-pressed="false">学生成绩</button>
+        <button class="seg-btn" type="button" data-sample="orders" aria-pressed="false">网店订单</button>
+        <button class="seg-btn" type="button" data-sample="survey" aria-pressed="false">问卷满意度</button>
+      </div>
+    </div>
+    <label class="btn ghost" for="csv-input">打开 CSV</label>
+    <input id="csv-input" type="file" accept=".csv,.tsv,.txt,text/csv,text/plain" hidden>
+    <button class="btn primary" type="button" id="btn-report">导出报告</button>
+  </div>
+</header>
+
+<section class="kpi-strip" id="kpi-strip" aria-label="关键指标"></section>
+
+<main class="workspace" id="workspace">
+  <aside class="field-rail" aria-label="字段列表">
+    <div class="rail-head">
+      <span>Fields</span>
+      <span class="mono" id="field-count">0</span>
+    </div>
+    <ul class="field-list" id="field-list"></ul>
+    <p class="rail-note">
+      <span aria-hidden="true">⬤</span>
+      <span>全部数据仅在本机浏览器内解析与统计，<b>不上传服务器</b>；刷新页面后回到内置示例。</span>
+    </p>
+  </aside>
+
+  <section class="content">
+    <nav class="tabs" role="tablist" aria-label="视图切换" id="tabs">
+      <button class="tab" type="button" role="tab" data-view="overview" aria-selected="true">概览</button>
+      <button class="tab" type="button" role="tab" data-view="charts" aria-selected="false">图表</button>
+      <button class="tab" type="button" role="tab" data-view="insights" aria-selected="false">洞察<span class="count" id="tab-insight-count">0</span></button>
+      <button class="tab" type="button" role="tab" data-view="data" aria-selected="false">数据</button>
+    </nav>
+    <div id="view" class="view" role="tabpanel" aria-live="polite"></div>
+  </section>
+</main>
+
+<div class="tooltip" id="tooltip" role="status" aria-live="off"></div>
+<div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>
+<noscript>本工具需要启用 JavaScript 才能运行，请开启后重新打开本页面。</noscript>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================= 基础工具 ============================= */
+var TYPES = { number:{label:'数值', cls:'t-number'}, category:{label:'分类', cls:'t-category'}, date:{label:'日期', cls:'t-date'}, text:{label:'文本', cls:'t-text'} };
+var CAT_PALETTE = ['#22d3ee','#f5a524','#7c9cf5','#4ade80','#c084fc','#fb7185','#38bdf8','#a3e635','#f97316','#94a3b8'];
+
+function $(sel, root){ return (root||document).querySelector(sel); }
+function $$(sel, root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
+}
+function clamp(v,a,b){ return Math.min(b, Math.max(a, v)); }
+function isNum(v){ return typeof v==='number' && isFinite(v); }
+function groupDigits(s){
+  var neg = s.charAt(0)==='-'; if(neg) s = s.slice(1);
+  var parts = s.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return (neg?'-':'') + parts.join('.');
+}
+function fmtNum(v, digits){
+  if(!isFinite(v)) return '—';
+  var d = (digits==null?2:digits);
+  var av = Math.abs(v);
+  if(av >= 1e9) return (v/1e9).toFixed(2)+'B';
+  if(av >= 1e6) return (v/1e6).toFixed(2)+'M';
+  var s = v.toFixed(d);
+  if(s.indexOf('.')>=0) s = s.replace(/0+$/,'').replace(/\.$/,'');
+  if(s==='' || s==='-') s='0';
+  return groupDigits(s);
+}
+function fmtInt(v){ return isFinite(v)? groupDigits(String(Math.round(v))) : '—'; }
+function fmtPct(v, d){ return (isFinite(v)? (v*100).toFixed(d==null?1:d) : '—') + '%'; }
+
+/* ============================= 内存状态 ============================= */
+var APP = {
+  ds: null,        // { name, source, encoding, delimiter, columns:[], rows:[[]] }
+  insights: [],
+  view: 'overview',
+  focus: null,
+  panels: {}       // 图表实例登记
+};
+
+/* ============================= 数值统计 ============================= */
+function mean(arr){ if(!arr.length) return NaN; var s=0; for(var i=0;i<arr.length;i++) s+=arr[i]; return s/arr.length; }
+function quantile(sorted, q){
+  if(!sorted.length) return NaN;
+  var pos = (sorted.length-1)*q;
+  var lo = Math.floor(pos), hi = Math.ceil(pos);
+  if(lo===hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi]-sorted[lo])*(pos-lo);
+}
+function stdDev(arr){
+  if(arr.length<2) return 0;
+  var m = mean(arr), s=0;
+  for(var i=0;i<arr.length;i++){ var d=arr[i]-m; s+=d*d; }
+  return Math.sqrt(s/(arr.length-1));
+}
+function skewness(arr){
+  if(arr.length<3) return 0;
+  var m = mean(arr), sd = stdDev(arr);
+  if(!sd) return 0;
+  var s=0;
+  for(var i=0;i<arr.length;i++){ var d=(arr[i]-m)/sd; s+=d*d*d; }
+  return (arr.length/((arr.length-1)*(arr.length-2))) * s;
+}
+function pearson(xs, ys){
+  var n = Math.min(xs.length, ys.length);
+  if(n<2) return NaN;
+  var mx=0, my=0, i;
+  for(i=0;i<n;i++){ mx+=xs[i]; my+=ys[i]; }
+  mx/=n; my/=n;
+  var sxy=0, sxx=0, syy=0;
+  for(i=0;i<n;i++){
+    var dx=xs[i]-mx, dy=ys[i]-my;
+    sxy+=dx*dy; sxx+=dx*dx; syy+=dy*dy;
+  }
+  if(sxx===0 || syy===0) return NaN;
+  return sxy/Math.sqrt(sxx*syy);
+}
+
+/* ============================= 类型识别 ============================= */
+var NUM_RE = /^[-+]?(\d{1,3}(,\d{3})+|\d+)(\.\d+)?$/;
+var DATE_RE_1 = /^\d{4}[-/年]\d{1,2}([-/月]\d{1,2}日?)?([ T]\d{1,2}:\d{2}(:\d{2})?)?$/;
+var DATE_RE_2 = /^\d{1,2}[-/]\d{1,2}[-/]\d{4}$/;
+
+function isNumericStr(s){
+  if(!s) return false;
+  var t = s.trim();
+  if(!NUM_RE.test(t)) return false;
+  var n = Number(t.replace(/,/g,''));
+  return isFinite(n);
+}
+function isDateStr(s){
+  if(!s) return false;
+  var t = s.trim();
+  if(!DATE_RE_1.test(t) && !DATE_RE_2.test(t)) return false;
+  var d = Date.parse(t.replace(/年|月/g,'-').replace(/日/g,''));
+  return isFinite(d);
+}
+function toNumber(s){ return Number(String(s).trim().replace(/,/g,'')); }
+function toDate(s){
+  var t = String(s).trim().replace(/年|月/g,'-').replace(/日/g,'').replace(/\//g,'-');
+  return new Date(t);
+}
+function cleanCell(v){
+  if(v==null) return null;
+  var s = String(v).trim();
+  return s==='' ? null : s;
+}
+
+function profile(ds){
+  var cols = [];
+  var rowCount = ds.rows.length;
+  for(var c=0;c<ds.columns.length;c++){
+    var name = ds.columns[c];
+    var missing = 0, numOk = 0, dateOk = 0;
+    var present = [], seen = Object.create(null), distinct = 0;
+    for(var r=0;r<rowCount;r++){
+      var cell = cleanCell(ds.rows[r][c]);
+      if(cell===null){ missing++; continue; }
+      present.push(cell);
+      if(isNum(cell)){ numOk++; }
+      else if(isNumericStr(cell)){ numOk++; }
+      if(isDateStr(cell)) dateOk++;
+      var key = cell.toLowerCase();
+      if(!seen[key]){ seen[key]=true; distinct++; }
+    }
+    var n = present.length;
+    var type = 'text';
+    if(n>0){
+      var numRatio = numOk/n, dateRatio = dateOk/n;
+      if(numRatio >= 0.9) type='number';
+      else if(dateRatio >= 0.8) type='date';
+      else if(distinct <= 20 && distinct/n <= 0.6) type='category';
+      else type='text';
+    } else { type='text'; }
+    var col = { name:name, index:c, type:type, missing:missing, present:n, distinct:distinct, missingRate: rowCount? missing/rowCount : 0 };
+    if(type==='number'){
+      var nums = [];
+      for(var i=0;i<present.length;i++){ if(isNumericStr(present[i])) nums.push(toNumber(present[i])); }
+      nums.sort(function(a,b){ return a-b; });
+      col.nums = nums;
+      col.min = nums.length? nums[0] : NaN;
+      col.max = nums.length? nums[nums.length-1] : NaN;
+      col.mean = mean(nums);
+      col.median = quantile(nums,0.5);
+      col.q1 = quantile(nums,0.25);
+      col.q3 = quantile(nums,0.75);
+      col.std = stdDev(nums);
+      col.skew = skewness(nums);
+      col.iqr = col.q3-col.q1;
+      var lo = col.q1 - 1.5*col.iqr, hi = col.q3 + 1.5*col.iqr;
+      col.outliers = 0;
+      for(var k=0;k<nums.length;k++){ if(nums[k] < lo || nums[k] > hi) col.outliers++; }
+    }
+    if(type==='category' || type==='text'){
+      var freq = Object.create(null);
+      for(var j=0;j<present.length;j++){
+        var kk = present[j];
+        freq[kk] = (freq[kk]||0)+1;
+      }
+      col.freq = Object.keys(freq).map(function(key){ return { key:key, value:freq[key] }; });
+      col.freq.sort(function(a,b){ return b.value-a.value; });
+      col.top = col.freq.length? col.freq[0] : null;
+      col.topShare = (n && col.top)? col.top.value/n : 0;
+    }
+    if(type==='date'){
+      var times=[];
+      for(var m=0;m<present.length;m++){ var tm = toDate(present[m]).getTime(); if(isFinite(tm)) times.push(tm); }
+      times.sort(function(a,b){ return a-b; });
+      col.minTime = times.length? times[0] : NaN;
+      col.maxTime = times.length? times[times.length-1] : NaN;
+    }
+    cols.push(col);
+  }
+  return cols;
+}
+
+function countDuplicates(rows){
+  var seen = Object.create(null), dup = 0;
+  for(var i=0;i<rows.length;i++){
+    var key = rows[i].map(function(v){ return v==null?'':String(v); }).join('\u0001');
+    if(seen[key]) dup++; else seen[key]=true;
+  }
+  return dup;
+}
+
+/* ============================= CSV 解析 ============================= */
+function decodeBuffer(buf){
+  var u8 = new Uint8Array(buf);
+  if(u8.length>=3 && u8[0]===0xEF && u8[1]===0xBB && u8[2]===0xBF){
+    return { text: new TextDecoder('utf-8').decode(u8.subarray(3)), encoding:'UTF-8 BOM' };
+  }
+  if(u8.length>=2 && u8[0]===0xFF && u8[1]===0xFE){
+    return { text: new TextDecoder('utf-16le').decode(u8.subarray(2)), encoding:'UTF-16LE' };
+  }
+  if(u8.length>=2 && u8[0]===0xFE && u8[1]===0xFF){
+    return { text: new TextDecoder('utf-16be').decode(u8.subarray(2)), encoding:'UTF-16BE' };
+  }
+  try{
+    return { text: new TextDecoder('utf-8', { fatal:true }).decode(u8), encoding:'UTF-8' };
+  }catch(e){
+    try{ return { text: new TextDecoder('gbk').decode(u8), encoding:'GBK / GB18030' }; }
+    catch(e2){ return { text: new TextDecoder('utf-8').decode(u8), encoding:'UTF-8(替换字符)' }; }
+  }
+}
+function splitLines(text){ return text.split(/\r\n|\n|\r/); }
+function countDelims(line, delim){
+  var count=0, inQ=false;
+  for(var i=0;i<line.length;i++){
+    var ch = line.charAt(i);
+    if(ch==='"'){ inQ = !inQ; }
+    else if(!inQ && ch===delim){ count++; }
+  }
+  return count;
+}
+function detectDelimiter(text){
+  var lines = splitLines(text).filter(function(l){ return l.trim()!==''; }).slice(0,30);
+  if(!lines.length) return ',';
+  var candidates = [',', ';', '\t', '|'];
+  var best = ',', bestScore = -1;
+  for(var ci=0; ci<candidates.length; ci++){
+    var d = candidates[ci];
+    var counts = [], i;
+    for(i=0;i<lines.length;i++) counts.push(countDelims(lines[i], d));
+    var nonZero = counts.filter(function(c){ return c>0; });
+    if(!nonZero.length) continue;
+    var tally = Object.create(null), modeCount=0, mode=0;
+    for(i=0;i<nonZero.length;i++){ tally[nonZero[i]] = (tally[nonZero[i]]||0)+1; }
+    Object.keys(tally).forEach(function(k){ if(tally[k]>modeCount){ modeCount=tally[k]; mode=Number(k); } });
+    var consistency = modeCount/lines.length;
+    var score = mode * consistency * Math.sqrt(modeCount/lines.length);
+    if(score > bestScore){ bestScore = score; best = d; }
+  }
+  return best;
+}
+function parseDelimited(text, delim){
+  var rows = [], row = [], field = '', inQ = false, i = 0;
+  var len = text.length;
+  function endField(){ row.push(field); field=''; }
+  function endRow(){ rows.push(row); row=[]; }
+  while(i<len){
+    var ch = text.charAt(i);
+    if(inQ){
+      if(ch==='"'){
+        if(text.charAt(i+1)==='"'){ field+='"'; i+=2; continue; }
+        inQ=false; i++; continue;
+      }
+      field += ch; i++; continue;
+    }
+    if(ch==='"'){ inQ=true; i++; continue; }
+    if(ch===delim){ endField(); i++; continue; }
+    if(ch==='\r'){ i++; continue; }
+    if(ch==='\n'){ endField(); endRow(); i++; continue; }
+    field += ch; i++;
+  }
+  if(field!=='' || row.length>0){ endField(); endRow(); }
+  // 丢弃完全空行
+  rows = rows.filter(function(r){ return r.length>1 || (r.length===1 && r[0].trim()!==''); });
+  return rows;
+}
+function buildDataset(name, source, encoding, text){
+  var delim = detectDelimiter(text);
+  var rows = parseDelimited(text, delim);
+  if(!rows.length) return null;
+  var header = rows[0].map(function(h, idx){ var v=String(h).trim(); return v===''? ('字段'+(idx+1)) : v; });
+  var body = rows.slice(1);
+  var width = header.length;
+  body = body.map(function(r){
+    var out = r.slice(0, width);
+    while(out.length < width) out.push('');
+    return out;
+  });
+  return {
+    name: name, source: source, encoding: encoding,
+    delimiter: delim === '\t' ? 'Tab \\t' : delim,
+    columns: header, rows: body
+  };
+}
+
+/* ============================= 示例数据 ============================= */
+function mulberry32(seed){
+  var a = seed >>> 0;
+  return function(){
+    a = (a + 0x6D2B79F5) >>> 0;
+    var t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function pad(n, w){ var s=String(n); while(s.length<w) s='0'+s; return s; }
+function pick(rnd, arr, weights){
+  if(!weights){
+    return arr[Math.floor(rnd()*arr.length)];
+  }
+  var total=0, i;
+  for(i=0;i<weights.length;i++) total+=weights[i];
+  var x = rnd()*total;
+  for(i=0;i<weights.length;i++){ x -= weights[i]; if(x<=0) return arr[i]; }
+  return arr[arr.length-1];
+}
+function randInt(rnd, a, b){ return a + Math.floor(rnd()*(b-a+1)); }
+function gauss(rnd, m, sd){
+  var u=0, v=0;
+  while(u===0) u=rnd();
+  while(v===0) v=rnd();
+  return m + sd*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+function fmtDate(d){ return d.getFullYear() + '-' + pad(d.getMonth()+1,2) + '-' + pad(d.getDate(),2); }
+
+var SURNAMES = '赵钱孙李周吴郑王冯陈褚卫蒋沈韩杨朱秦尤许何吕施张孔曹严华金魏陶姜'.split('');
+var GIVEN = '伟芳娜敏静丽强磊洋艳勇军杰娟涛明超秀霞平刚桂英宇涵子墨梓萱欣怡浩然雨泽思远'.split('');
+function cnName(rnd){
+  var g = pick(rnd, GIVEN);
+  if(rnd()<0.5) g += pick(rnd, GIVEN);
+  return pick(rnd, SURNAMES) + g;
+}
+
+function sampleGrades(){
+  var rnd = mulberry32(20240117);
+  var cols = ['学号','姓名','班级','性别','语文','数学','英语','考试日期'];
+  var rows = [];
+  var base = new Date(2024, 0, 8);
+  for(var i=0;i<64;i++){
+    var cls = '高一(' + randInt(rnd,1,4) + ')班';
+    var gender = rnd()<0.52 ? '男' : '女';
+    var d = new Date(base.getTime()); d.setDate(base.getDate() + randInt(rnd,0,45));
+    var chinese = clamp(Math.round(gauss(rnd, 82, 9)), 52, 100);
+    var math = clamp(Math.round(gauss(rnd, 76, 14)), 40, 100);
+    var english = clamp(Math.round(gauss(rnd, 79, 11)), 45, 100);
+    var blank = rnd();
+    rows.push([
+      'S' + (2024000 + i + 1),
+      cnName(rnd),
+      cls,
+      gender,
+      blank < 0.06 ? '' : String(chinese),
+      blank > 0.94 ? '' : String(math),
+      String(english),
+      fmtDate(d)
+    ]);
+  }
+  // 制造 3 条重复行，便于洞察示例
+  rows.push(rows[4].slice()); rows.push(rows[17].slice()); rows.push(rows[17].slice());
+  return { name:'示例 · 学生成绩', columns:cols, rows:rows, delimiter:',', encoding:'内置演示数据' };
+}
+
+function sampleOrders(){
+  var rnd = mulberry32(883311);
+  var cols = ['订单号','下单日期','商品类别','销售渠道','收货地区','单价','数量','订单金额'];
+  var categories = ['数码配件','服饰鞋包','家居日用','美妆个护','食品饮料'];
+  var prices = { '数码配件':[39,499], '服饰鞋包':[59,399], '家居日用':[29,259], '美妆个护':[49,329], '食品饮料':[19,149] };
+  var channels = ['APP 客户端','微信小程序','PC 官网','直播间'];
+  var channelW = [0.42, 0.31, 0.15, 0.12];
+  var regions = ['华东','华北','华南','西南','华中','西北'];
+  var regionW = [0.34, 0.2, 0.22, 0.12, 0.08, 0.04];
+  var rows = [];
+  var base = new Date(2024, 4, 1);
+  for(var i=0;i<86;i++){
+    var cat = pick(rnd, categories);
+    var range = prices[cat];
+    var price = Math.round((range[0] + rnd()*(range[1]-range[0]))*100)/100;
+    var qty = pick(rnd, [1,1,1,2,2,3,4,5]);
+    var d = new Date(base.getTime()); d.setDate(base.getDate() + randInt(rnd,0,88));
+    var amount = Math.round(price*qty*(0.94 + rnd()*0.12)*100)/100;
+    rows.push([
+      'DD2024' + pad(1000+i, 4),
+      fmtDate(d),
+      cat,
+      pick(rnd, channels, channelW),
+      pick(rnd, regions, regionW),
+      String(price),
+      String(qty),
+      String(amount)
+    ]);
+  }
+  rows.push(rows[9].slice());
+  return { name:'示例 · 网店订单', columns:cols, rows:rows, delimiter:',', encoding:'内置演示数据' };
+}
+
+function sampleSurvey(){
+  var rnd = mulberry32(556677);
+  var cols = ['受访者编号','提交日期','年龄段','所在城市','满意度评分','推荐意愿','使用频率','意见建议'];
+  var ages = ['18-25 岁','26-35 岁','36-45 岁','46 岁以上'];
+  var ageW = [0.28, 0.4, 0.22, 0.1];
+  var cities = ['北京','上海','广州','深圳','杭州','成都','武汉','西安'];
+  var cityW = [0.16,0.17,0.12,0.15,0.1,0.11,0.1,0.09];
+  var freq = ['几乎每天','每周数次','每月数次','偶尔使用'];
+  var freqW = [0.34,0.3,0.22,0.14];
+  var openers = ['整体流畅','界面清爽','功能齐全','移动端体验不错','响应速度可以','数据展示清晰'];
+  var asks = ['希望增加导出功能','希望支持自定义标签','希望能有快捷键','希望报告模板更丰富','希望支持多人协作','希望加载更快','希望能有暗色主题'];
+  var rows = [];
+  var base = new Date(2024, 6, 1);
+  for(var i=0;i<74;i++){
+    var sat = clamp(Math.round(gauss(rnd, 4.1, 0.9)), 1, 5);
+    var d = new Date(base.getTime()); d.setDate(base.getDate() + randInt(rnd,0,59));
+    var rec = clamp(Math.round(gauss(rnd, sat*1.8, 1.4)), 0, 10);
+    rows.push([
+      'R' + pad(3200+i, 4),
+      fmtDate(d),
+      pick(rnd, ages, ageW),
+      pick(rnd, cities, cityW),
+      String(sat),
+      String(rec),
+      pick(rnd, freq, freqW),
+      rnd()<0.3 ? '' : (pick(rnd, openers) + '，' + pick(rnd, asks))
+    ]);
+  }
+  return { name:'示例 · 问卷满意度', columns:cols, rows:rows, delimiter:',', encoding:'内置演示数据' };
+}
+
+var SAMPLES = { grades: sampleGrades, orders: sampleOrders, survey: sampleSurvey };
+
+/* ============================= 洞察 ============================= */
+function buildInsights(ds, cols, dupCount){
+  var out = [];
+  var rowCount = ds.rows.length;
+  var typeCount = { number:0, category:0, date:0, text:0 };
+  cols.forEach(function(col){ typeCount[col.type]++; });
+
+  out.push({
+    level:'info', title:'数据规模与结构',
+    text:'数据集「' + ds.name + '」共 ' + fmtInt(rowCount) + ' 行 × ' + cols.length + ' 列，包含 ' +
+      typeCount.number + ' 个数值字段、' + typeCount.category + ' 个分类字段、' + typeCount.date + ' 个日期字段、' + typeCount.text +
+      ' 个文本字段；分隔符识别为 “' + ds.delimiter + '”。'
+  });
+
+  var totalCells = rowCount * cols.length;
+  var totalMissing = cols.reduce(function(a,c){ return a + c.missing; }, 0);
+  if(totalMissing>0){
+    var worst = cols.slice().sort(function(a,b){ return b.missing-a.missing; })[0];
+    var worstRate = worst.missingRate;
+    out.push({
+      level: worstRate>=0.2 ? 'warn' : (worstRate>=0.05 ? 'notice' : 'info'),
+      title:'缺失值分布',
+      text:'共 ' + fmtInt(totalMissing) + ' 个缺失单元格，整体缺失率 ' + fmtPct(totalCells? totalMissing/totalCells : 0) +
+        '。缺失最集中的字段是「' + worst.name + '」，缺失 ' + fmtInt(worst.missing) + ' 个（' + fmtPct(worstRate) + '），分析该字段前建议先确认缺失原因。'
+    });
+    cols.filter(function(c){ return c.missing>0; })
+      .sort(function(a,b){ return b.missing-a.missing; })
+      .slice(0,3).forEach(function(c){
+        if(c===worst) return;
+        out.push({ level: c.missingRate>=0.2?'warn':'info', title:'字段缺失 · ' + c.name,
+          text:'「' + c.name + '」缺失 ' + fmtInt(c.missing) + ' 个值（' + fmtPct(c.missingRate) + '），有效值 ' + fmtInt(c.present) + ' 个。' });
+      });
+  } else {
+    out.push({ level:'info', title:'数据完整性', text:'所有字段均无缺失值，可直接进入分布与关系分析。' });
+  }
+
+  if(dupCount>0){
+    var dupRate = rowCount? dupCount/rowCount : 0;
+    out.push({ level: dupRate>=0.05?'warn':'notice', title:'重复行检测',
+      text:'检测到 ' + fmtInt(dupCount) + ' 行与其他行完全相同（占 ' + fmtPct(dupRate) + '）。若为采集或合并导致，建议先去重再统计，避免指标被放大。' });
+  } else {
+    out.push({ level:'info', title:'重复行检测', text:'未发现完全重复的行，数据记录唯一性良好。' });
+  }
+
+  cols.filter(function(c){ return c.type==='category'; }).forEach(function(c){
+    if(!c.top || !c.present) return;
+    if(c.topShare >= 0.8){
+      out.push({ level:'notice', title:'类别集中度 · ' + c.name,
+        text:'「' + c.name + '」共 ' + c.distinct + ' 个类别，其中「' + c.top.key + '」占 ' + fmtPct(c.topShare) + '（' + fmtInt(c.top.value) + ' 行），分布高度集中，其余类别样本较少。' });
+    } else if(c.topShare >= 0.5){
+      out.push({ level:'info', title:'类别集中度 · ' + c.name,
+        text:'「' + c.name + '」中「' + c.top.key + '」占比 ' + fmtPct(c.topShare) + '，为主要构成，需关注长尾类别样本量。' });
+    }
+  });
+
+  cols.filter(function(c){ return c.type==='number'; }).forEach(function(c){
+    if(Math.abs(c.skew) >= 1){
+      out.push({ level:'notice', title:'分布偏斜 · ' + c.name,
+        text:'「' + c.name + '」偏度 ' + c.skew.toFixed(2) + '，分布' + (c.skew>0?'右偏（存在较大取值拖尾）':'左偏（存在较小取值拖尾）') +
+          '；均值 ' + fmtNum(c.mean) + ' 与中位数 ' + fmtNum(c.median) + ' 相差 ' + fmtNum(Math.abs(c.mean-c.median)) + '，建议以中位数描述集中趋势。' });
+    } else if(Math.abs(c.skew) >= 0.6){
+      out.push({ level:'info', title:'分布形态 · ' + c.name,
+        text:'「' + c.name + '」偏度 ' + c.skew.toFixed(2) + '，轻微偏斜，均值 ' + fmtNum(c.mean) + '、中位数 ' + fmtNum(c.median) + '。' });
+    }
+    if(c.outliers > 0){
+      var rate = c.present ? c.outliers/c.present : 0;
+      out.push({ level: rate>=0.05?'warn':'notice', title:'离群点 · ' + c.name,
+        text:'按 IQR 规则（Q1 ' + fmtNum(c.q1) + ' / Q3 ' + fmtNum(c.q3) + '）检测到 ' + fmtInt(c.outliers) + ' 个离群点，占有效值 ' + fmtPct(rate) +
+          '，取值范围 ' + fmtNum(c.min) + ' ~ ' + fmtNum(c.max) + '。' });
+    }
+  });
+
+  var numCols = cols.filter(function(c){ return c.type==='number' && c.nums.length>=2; });
+  var pairs = [];
+  for(var i=0;i<numCols.length;i++){
+    for(var j=i+1;j<numCols.length;j++){
+      var r = pairCorrelation(ds, numCols[i].index, numCols[j].index);
+      if(isFinite(r)) pairs.push({ a:numCols[i].name, b:numCols[j].name, r:r });
+    }
+  }
+  pairs.sort(function(p,q){ return Math.abs(q.r)-Math.abs(p.r); });
+  pairs.slice(0,3).forEach(function(p){
+    if(Math.abs(p.r) >= 0.85){
+      out.push({ level:'warn', title:'强相关 · ' + p.a + ' ↔ ' + p.b,
+        text:'两者皮尔逊相关系数 r = ' + p.r.toFixed(3) + '，存在' + (p.r>0?'强正相关':'强负相关') + '，近似线性关系明显，建模时注意多重共线性或重复计量。' });
+    } else if(Math.abs(p.r) >= 0.7){
+      out.push({ level:'notice', title:'显著相关 · ' + p.a + ' ↔ ' + p.b,
+        text:'相关系数 r = ' + p.r.toFixed(3) + '，' + (p.r>0?'正':'负') + '相关较为明显，可作为联动分析线索。' });
+    } else if(Math.abs(p.r) >= 0.5){
+      out.push({ level:'info', title:'中等相关 · ' + p.a + ' ↔ ' + p.b,
+        text:'相关系数 r = ' + p.r.toFixed(3) + '，呈中等程度' + (p.r>0?'正':'负') + '相关。' });
+    }
+  });
+  if(!pairs.length){
+    out.push({ level:'info', title:'相关性分析', text:'数值字段不足两个，暂无法计算字段间相关性。' });
+  }
+
+  cols.filter(function(c){ return c.type==='date'; }).forEach(function(c){
+    if(isFinite(c.minTime) && isFinite(c.maxTime)){
+      var days = Math.round((c.maxTime - c.minTime)/86400000);
+      out.push({ level:'info', title:'时间跨度 · ' + c.name,
+        text:'「' + c.name + '」覆盖 ' + new Date(c.minTime).toISOString().slice(0,10) + ' 至 ' + new Date(c.maxTime).toISOString().slice(0,10) +
+          '，跨度约 ' + days + ' 天，可用于趋势与周期性分析。' });
+    }
+  });
+
+  cols.filter(function(c){ return c.type==='text'; }).forEach(function(c){
+    var filled = c.present;
+    out.push({ level:'info', title:'文本字段 · ' + c.name,
+      text:'「' + c.name + '」为自由文本，有效值 ' + fmtInt(filled) + ' 个，去重后 ' + fmtInt(c.distinct) + ' 条，适合做关键词与主题提取。' });
+  });
+
+  return out;
+}
+
+/* ============================= 取数辅助 ============================= */
+function pairCorrelation(ds, i, j){
+  var xs = [], ys = [];
+  for(var r=0;r<ds.rows.length;r++){
+    var a = cleanCell(ds.rows[r][i]), b = cleanCell(ds.rows[r][j]);
+    if(a===null || b===null) continue;
+    if(!isNumericStr(a) || !isNumericStr(b)) continue;
+    xs.push(toNumber(a)); ys.push(toNumber(b));
+  }
+  return pearson(xs, ys);
+}
+function correlationMatrix(ds, cols){
+  var n = cols.length, m = [];
+  for(var i=0;i<n;i++){
+    m.push([]);
+    for(var j=0;j<n;j++){
+      m[i].push(i===j ? 1 : pairCorrelation(ds, cols[i].index, cols[j].index));
+    }
+  }
+  return m;
+}
+
+/* ============================= 图表引擎 ============================= */
+var tooltipEl = null;
+function showTooltip(html, x, y){
+  if(!tooltipEl) tooltipEl = $('#tooltip');
+  tooltipEl.innerHTML = html;
+  tooltipEl.style.left = x + 'px';
+  tooltipEl.style.top = y + 'px';
+  tooltipEl.classList.add('on');
+}
+function hideTooltip(){
+  if(!tooltipEl) tooltipEl = $('#tooltip');
+  tooltipEl.classList.remove('on');
+}
+function tipRow(label, value){
+  return esc(label) + '　<span class="tv">' + esc(value) + '</span>';
+}
+function prepCanvas(canvas, heightCss){
+  var rect = canvas.getBoundingClientRect();
+  var w = Math.max(60, Math.round(rect.width || canvas.parentNode.clientWidth || 480));
+  var h = heightCss;
+  if(canvas.style.height) h = parseInt(canvas.style.height, 10) || h;
+  var dpr = clamp(window.devicePixelRatio || 1, 1, 2);
+  canvas.width = Math.round(w*dpr);
+  canvas.height = Math.round(h*dpr);
+  var ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#0d1424';
+  ctx.fillRect(0, 0, w, h);
+  return { ctx:ctx, w:w, h:h };
+}
+function axisText(ctx, text, x, y, align, color, size){
+  ctx.save();
+  ctx.fillStyle = color || '#8fa1be';
+  ctx.font = (size||11) + 'px ' + MONO_FONT;
+  ctx.textAlign = align || 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+var MONO_FONT = 'Consolas, Menlo, monospace';
+
+function drawBar(canvas, items, onHover){
+  var g = prepCanvas(canvas, 220);
+  var ctx = g.ctx, w = g.w, h = g.h;
+  if(!items.length){ emptyCanvas(ctx, w, h); return; }
+  var padL = 118, padR = 56, padT = 14, padB = 12;
+  var n = items.length;
+  var rowH = (h - padT - padB) / n;
+  var barH = Math.min(22, rowH*0.62);
+  var max = Math.max.apply(null, items.map(function(d){ return d.value; })) || 1;
+  var plotW = w - padL - padR;
+  var hits = [];
+  for(var i=0;i<n;i++){
+    var it = items[i];
+    var y = padT + i*rowH + rowH/2;
+    var bw = Math.max(2, (it.value/max)*plotW);
+    ctx.fillStyle = 'rgba(34,211,238,.1)';
+    ctx.beginPath(); roundRect(ctx, padL, y-barH/2, plotW, barH, 4); ctx.fill();
+    var grd = ctx.createLinearGradient(padL, 0, padL+bw, 0);
+    grd.addColorStop(0, '#0891b2'); grd.addColorStop(1, '#22d3ee');
+    ctx.fillStyle = grd;
+    ctx.beginPath(); roundRect(ctx, padL, y-barH/2, bw, barH, 4); ctx.fill();
+    axisText(ctx, truncate(it.label, 9), padL-10, y, 'right', '#a9b8d0', 11.5);
+    axisText(ctx, fmtNum(it.value, 0), padL+bw+8, y, 'left', '#e8eefb', 11.5);
+    hits.push({ x:padL, y:y-barH/2-4, w:plotW, h:barH+8, html: tipRow(it.label, fmtNum(it.value,0) + (it.extra? '　'+it.extra : '')) });
+  }
+  canvas.__hits = hits;
+  attachHover(canvas, g);
+}
+
+function drawHistogram(canvas, col){
+  var g = prepCanvas(canvas, 220);
+  var ctx = g.ctx, w = g.w, h = g.h;
+  var nums = col.nums;
+  if(!nums || nums.length<2){ emptyCanvas(ctx, w, h); return; }
+  var min = nums[0], max = nums[nums.length-1];
+  if(min===max){ min -= 1; max += 1; }
+  var binCount = clamp(Math.ceil(Math.sqrt(nums.length)), 6, 16);
+  var step = (max-min)/binCount;
+  var bins = [];
+  for(var i=0;i<binCount;i++){ bins.push({ lo:min+i*step, hi:min+(i+1)*step, count:0 }); }
+  for(var k=0;k<nums.length;k++){
+    var idx = clamp(Math.floor((nums[k]-min)/step), 0, binCount-1);
+    bins[idx].count++;
+  }
+  var padL=44, padR=14, padT=16, padB=34;
+  var plotW = w-padL-padR, plotH = h-padT-padB;
+  var maxC = Math.max.apply(null, bins.map(function(b){ return b.count; })) || 1;
+  drawYGrid(ctx, padL, padT, plotW, plotH, maxC);
+  var bw = plotW/binCount;
+  var hits = [];
+  for(var b=0;b<binCount;b++){
+    var bar = bins[b];
+    var bh = (bar.count/maxC)*plotH;
+    var x = padL + b*bw + 2, y = padT + plotH - bh;
+    ctx.fillStyle = '#1f6f8b';
+    ctx.beginPath(); roundRect(ctx, x, y, Math.max(2,bw-4), bh, 3); ctx.fill();
+    ctx.fillStyle = 'rgba(34,211,238,.85)';
+    ctx.fillRect(x, y, Math.max(2,bw-4), 3);
+    hits.push({ x:padL+b*bw, y:padT, w:bw, h:plotH, html: esc(fmtNum(bar.lo,1)+' ~ '+fmtNum(bar.hi,1)) + '<br>频数　<span class="tv">'+fmtInt(bar.count)+'</span>' });
+  }
+  // x 轴刻度
+  for(var t=0;t<=4;t++){
+    var vx = min + (max-min)*(t/4);
+    axisText(ctx, fmtNum(vx,1), padL + plotW*(t/4), h-padB+14, t===0?'left':(t===4?'right':'center'), '#8fa1be', 11);
+  }
+  // 均值线
+  var mx = padL + ((col.mean-min)/(max-min))*plotW;
+  ctx.save();
+  ctx.strokeStyle = '#f5a524'; ctx.lineWidth = 1.5; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(mx, padT); ctx.lineTo(mx, padT+plotH); ctx.stroke();
+  ctx.restore();
+  ctx.save();
+  ctx.fillStyle = '#f5a524'; ctx.font = '11px ' + MONO_FONT; ctx.textAlign='left'; ctx.textBaseline='top';
+  var label = '均值 ' + fmtNum(col.mean);
+  var lx = clamp(mx+6, padL, padL+plotW-88);
+  ctx.fillText(label, lx, padT-2);
+  ctx.restore();
+  hits.push({ x:mx-6, y:padT, w:12, h:plotH, html: esc(col.name) + ' 均值<br><span class="tv">' + fmtNum(col.mean,3) + '</span>' });
+  canvas.__hits = hits;
+  attachHover(canvas, g);
+}
+
+function drawPie(canvas, items, total){
+  var g = prepCanvas(canvas, 220);
+  var ctx = g.ctx, w = g.w, h = g.h;
+  if(!items.length){ emptyCanvas(ctx, w, h); return; }
+  var cx = w/2, cy = h/2;
+  var r = Math.min(w, h)/2 - 20;
+  var inner = r*0.58;
+  var sum = total || items.reduce(function(a,b){ return a+b.value; }, 0) || 1;
+  var start = -Math.PI/2;
+  var hits = [];
+  for(var i=0;i<items.length;i++){
+    var slice = (items[i].value/sum)*Math.PI*2;
+    var end = start + slice;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = CAT_PALETTE[i % CAT_PALETTE.length];
+    ctx.fill();
+    ctx.strokeStyle = '#0d1424'; ctx.lineWidth = 2; ctx.stroke();
+    hits.push({ polar:{ cx:cx, cy:cy, a0:start, a1:end, r0:inner, r1:r },
+      html: esc(items[i].label) + '<br>占比　<span class="tv">' + fmtPct(items[i].value/sum) + '</span><br>数量　<span class="tv">' + fmtInt(items[i].value) + '</span>' });
+    start = end;
+  }
+  ctx.beginPath(); ctx.arc(cx, cy, inner, 0, Math.PI*2);
+  ctx.fillStyle = '#0d1424'; ctx.fill();
+  ctx.fillStyle = '#e8eefb'; ctx.font = '700 20px ' + MONO_FONT; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(fmtInt(sum), cx, cy-6);
+  ctx.fillStyle = '#8fa1be'; ctx.font = '11px ' + MONO_FONT;
+  ctx.fillText('总计', cx, cy+12);
+  // 图例
+  var lx = 12, ly = 12;
+  for(var j=0;j<items.length && j<8;j++){
+    var yy = ly + j*16;
+    ctx.fillStyle = CAT_PALETTE[j % CAT_PALETTE.length];
+    ctx.fillRect(lx, yy-4, 9, 9);
+    ctx.fillStyle = '#a9b8d0'; ctx.font = '11px ' + MONO_FONT; ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillText(truncate(items[j].label, 10) + ' ' + fmtPct(items[j].value/sum, 0), lx+14, yy);
+  }
+  canvas.__hits = hits;
+  attachHover(canvas, g, true);
+}
+
+function drawLine(canvas, points, yLabel, xLabel){
+  var g = prepCanvas(canvas, 220);
+  var ctx = g.ctx, w = g.w, h = g.h;
+  if(!points.length){ emptyCanvas(ctx, w, h); return; }
+  var padL=52, padR=16, padT=16, padB=36;
+  var plotW=w-padL-padR, plotH=h-padT-padB;
+  var ys = points.map(function(p){ return p.y; });
+  var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+  if(minY===maxY){ minY-=1; maxY+=1; }
+  drawYGrid(ctx, padL, padT, plotW, plotH, maxY, minY);
+  var n = points.length;
+  function px(i){ return padL + (n<=1? plotW/2 : plotW*(i/(n-1))); }
+  function py(v){ return padT + plotH - ((v-minY)/(maxY-minY))*plotH; }
+  // 面积
+  ctx.beginPath();
+  ctx.moveTo(px(0), padT+plotH);
+  for(var i=0;i<n;i++){ ctx.lineTo(px(i), py(points[i].y)); }
+  ctx.lineTo(px(n-1), padT+plotH);
+  ctx.closePath();
+  var grad = ctx.createLinearGradient(0, padT, 0, padT+plotH);
+  grad.addColorStop(0, 'rgba(34,211,238,.28)');
+  grad.addColorStop(1, 'rgba(34,211,238,0)');
+  ctx.fillStyle = grad; ctx.fill();
+  // 线
+  ctx.beginPath();
+  for(var k=0;k<n;k++){ if(k===0) ctx.moveTo(px(k), py(points[k].y)); else ctx.lineTo(px(k), py(points[k].y)); }
+  ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 2; ctx.stroke();
+  // 点
+  for(var m=0;m<n;m++){
+    if(n>28 && m%Math.ceil(n/28)!==0 && m!==n-1) continue;
+    ctx.beginPath(); ctx.arc(px(m), py(points[m].y), 3, 0, Math.PI*2);
+    ctx.fillStyle = '#0d1424'; ctx.fill();
+    ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 1.6; ctx.stroke();
+  }
+  var xTicks = [0, Math.floor((n-1)/2), n-1];
+  xTicks.forEach(function(t, idx){
+    if(n<=1) return;
+    axisText(ctx, points[t].label, px(t), h-padB+14, idx===0?'left':(idx===2?'right':'center'), '#8fa1be', 11);
+  });
+  axisText(ctx, yLabel||'', padL-8, padT+2, 'right', '#8fa1be', 11);
+  var hits = [];
+  for(var q=0;q<n;q++){
+    hits.push({ x:px(q)-7, y:padT, w:14, h:plotH, html: esc(points[q].label) + '<br>' + esc(yLabel||'值') + '　<span class="tv">' + fmtNum(points[q].y,2) + '</span>' });
+  }
+  canvas.__hits = hits;
+  attachHover(canvas, g);
+}
+
+function drawScatter(canvas, pts, r, xName, yName){
+  var g = prepCanvas(canvas, 220);
+  var ctx = g.ctx, w = g.w, h = g.h;
+  if(!pts.length){ emptyCanvas(ctx, w, h); return; }
+  var padL=54, padR=18, padT=18, padB=36;
+  var plotW=w-padL-padR, plotH=h-padT-padB;
+  var xs = pts.map(function(p){ return p.x; }), ys = pts.map(function(p){ return p.y; });
+  var minX=Math.min.apply(null,xs), maxX=Math.max.apply(null,xs);
+  var minY=Math.min.apply(null,ys), maxY=Math.max.apply(null,ys);
+  if(minX===maxX){ minX-=1; maxX+=1; }
+  if(minY===maxY){ minY-=1; maxY+=1; }
+  drawYGrid(ctx, padL, padT, plotW, plotH, maxY, minY);
+  function px(v){ return padL + ((v-minX)/(maxX-minX))*plotW; }
+  function py(v){ return padT + plotH - ((v-minY)/(maxY-minY))*plotH; }
+  // 趋势线
+  if(pts.length>=2){
+    var mx = mean(xs), my = mean(ys), sxy=0, sxx=0;
+    for(var i=0;i<pts.length;i++){ sxy += (xs[i]-mx)*(ys[i]-my); sxx += (xs[i]-mx)*(xs[i]-mx); }
+    if(sxx){
+      var slope = sxy/sxx, intercept = my - slope*mx;
+      ctx.save();
+      ctx.strokeStyle = '#f5a524'; ctx.lineWidth = 1.6; ctx.setLineDash([6,4]);
+      ctx.beginPath();
+      ctx.moveTo(px(minX), py(slope*minX+intercept));
+      ctx.lineTo(px(maxX), py(slope*maxX+intercept));
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+  for(var k=0;k<pts.length;k++){
+    ctx.beginPath(); ctx.arc(px(pts[k].x), py(pts[k].y), 3.2, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(34,211,238,.75)'; ctx.fill();
+  }
+  var rTxt = isFinite(r) ? ('r = ' + r.toFixed(3)) : 'r = —';
+  ctx.save();
+  ctx.fillStyle = '#0d1424'; ctx.globalAlpha = 0.8;
+  ctx.fillRect(padL+8, padT+6, 96, 22);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#f5a524'; ctx.font = '700 12px ' + MONO_FONT; ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText(rTxt, padL+16, padT+17);
+  ctx.restore();
+  axisText(ctx, fmtNum(minX,1), padL, h-padB+14, 'left', '#8fa1be', 11);
+  axisText(ctx, fmtNum(maxX,1), padL+plotW, h-padB+14, 'right', '#8fa1be', 11);
+  ctx.save();
+  ctx.fillStyle = '#8fa1be'; ctx.font = '11px ' + MONO_FONT; ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText(xName || 'X', padL+plotW/2, h-2);
+  ctx.restore();
+  var hits = [];
+  for(var q=0;q<pts.length;q++){
+    hits.push({ x:px(pts[q].x)-5, y:py(pts[q].y)-5, w:10, h:10,
+      html: esc(xName||'X') + '　<span class="tv">' + fmtNum(pts[q].x,2) + '</span><br>' + esc(yName||'Y') + '　<span class="tv">' + fmtNum(pts[q].y,2) + '</span>' });
+  }
+  canvas.__hits = hits;
+  attachHover(canvas, g);
+}
+
+function drawHeatmap(canvas, labels, matrix){
+  var g = prepCanvas(canvas, Math.max(220, labels.length*34 + 30));
+  var ctx = g.ctx, w = g.w, h = g.h;
+  if(labels.length<2){ emptyCanvas(ctx, w, h); return; }
+  var padL = 92, padT = 66, padR = 12, padB = 12;
+  var size = Math.min(w-padL-padR, h-padT-padB);
+  var cell = size/labels.length;
+  var hits = [];
+  for(var i=0;i<labels.length;i++){
+    for(var j=0;j<labels.length;j++){
+      var v = matrix[i][j];
+      var x = padL + j*cell, y = padT + i*cell;
+      ctx.fillStyle = corrColor(v);
+      ctx.fillRect(x+0.5, y+0.5, cell-1, cell-1);
+      if(cell>26){
+        ctx.fillStyle = Math.abs(v)>0.6 ? '#04202b' : '#cbd5e1';
+        ctx.font = '11px ' + MONO_FONT; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(isFinite(v)? v.toFixed(2) : '—', x+cell/2, y+cell/2);
+      }
+      hits.push({ x:x, y:y, w:cell, h:cell, html: esc(labels[i]) + ' ↔ ' + esc(labels[j]) + '<br>r　<span class="tv">' + (isFinite(v)? v.toFixed(3) : '—') + '</span>' });
+    }
+  }
+  for(var r=0;r<labels.length;r++){
+    ctx.save();
+    ctx.fillStyle = '#a9b8d0'; ctx.font = '11px ' + MONO_FONT; ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(truncate(labels[r], 7), padL-8, padT+r*cell+cell/2);
+    ctx.restore();
+  }
+  for(var c=0;c<labels.length;c++){
+    ctx.save();
+    ctx.translate(padL + c*cell + cell/2, padT-8);
+    ctx.rotate(-Math.PI/4);
+    ctx.fillStyle = '#a9b8d0'; ctx.font = '11px ' + MONO_FONT; ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillText(truncate(labels[c], 7), 0, 0);
+    ctx.restore();
+  }
+  // 色条
+  var bx = padL, by = 14, bwid = size, bhei = 10;
+  var grd = ctx.createLinearGradient(bx, 0, bx+bwid, 0);
+  grd.addColorStop(0, corrColor(-1)); grd.addColorStop(0.5, corrColor(0)); grd.addColorStop(1, corrColor(1));
+  ctx.fillStyle = grd; ctx.fillRect(bx, by, bwid, bhei);
+  axisText(ctx, '-1', bx, by+bhei+10, 'left', '#8fa1be', 10);
+  axisText(ctx, '0', bx+bwid/2, by+bhei+10, 'center', '#8fa1be', 10);
+  axisText(ctx, '+1', bx+bwid, by+bhei+10, 'right', '#8fa1be', 10);
+  canvas.__hits = hits;
+  attachHover(canvas, g);
+}
+function corrColor(v){
+  if(!isFinite(v)) return '#131c31';
+  var t = clamp(v, -1, 1);
+  if(t>=0){
+    var a = t;
+    return 'rgb(' + Math.round(19+13*a) + ',' + Math.round(28+175*a) + ',' + Math.round(49+189*a) + ')';
+  }
+  var b = -t;
+  return 'rgb(' + Math.round(19+226*b) + ',' + Math.round(28+137*b) + ',' + Math.round(49-13*b) + ')';
+}
+function emptyCanvas(ctx, w, h){
+  ctx.fillStyle = '#8fa1be'; ctx.font = '13px ' + MONO_FONT;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('暂无可绘制的数据', w/2, h/2);
+}
+function drawYGrid(ctx, padL, padT, plotW, plotH, maxV, minV){
+  var lo = (minV==null ? 0 : minV);
+  var steps = 4;
+  ctx.save();
+  for(var i=0;i<=steps;i++){
+    var v = lo + (maxV-lo)*(i/steps);
+    var y = padT + plotH - (i/steps)*plotH;
+    ctx.strokeStyle = 'rgba(44,61,94,.85)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, y+0.5); ctx.lineTo(padL+plotW, y+0.5); ctx.stroke();
+    ctx.fillStyle = '#8fa1be'; ctx.font = '10.5px ' + MONO_FONT; ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(fmtNum(v, 0), padL-6, y);
+  }
+  ctx.restore();
+}
+function roundRect(ctx, x, y, w, h, r){
+  var rr = Math.min(r, Math.abs(w)/2, Math.abs(h)/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr, y);
+  ctx.arcTo(x+w, y, x+w, y+h, rr);
+  ctx.arcTo(x+w, y+h, x, y+h, rr);
+  ctx.arcTo(x, y+h, x, y, rr);
+  ctx.arcTo(x, y, x+w, y, rr);
+  ctx.closePath();
+}
+function truncate(s, n){
+  s = String(s);
+  return s.length>n ? s.slice(0, n-1)+'…' : s;
+}
+function attachHover(canvas, g, isPolar){
+  canvas.onmousemove = function(ev){
+    var rect = canvas.getBoundingClientRect();
+    var x = ev.clientX - rect.left, y = ev.clientY - rect.top;
+    var hit = null, hits = canvas.__hits || [];
+    for(var i=0;i<hits.length;i++){
+      var it = hits[i];
+      if(isPolar && it.polar){
+        var dx = x-it.polar.cx, dy = y-it.polar.cy;
+        var dist = Math.sqrt(dx*dx+dy*dy);
+        if(dist>=it.polar.r0 && dist<=it.polar.r1){
+          var ang = Math.atan2(dy, dx);
+          var a0 = it.polar.a0, a1 = it.polar.a1;
+          while(ang<a0) ang += Math.PI*2;
+          if(ang<=a1){ hit = it; break; }
+        }
+      } else if(it.polar){ continue; }
+      else if(x>=it.x && x<=it.x+it.w && y>=it.y && y<=it.y+it.h){ hit = it; break; }
+    }
+    if(hit) showTooltip(hit.html, ev.clientX, ev.clientY - 4);
+    else hideTooltip();
+  };
+  canvas.onmouseleave = function(){ hideTooltip(); };
+}
+
+/* ============================= 图表面板 ============================= */
+function chartPanel(key, title, note, controlsHtml){
+  return '<div class="panel" data-panel="' + key + '">' +
+    '<div class="panel-head"><div><div class="panel-title">' + esc(title) + '</div>' +
+    (note? '<div class="panel-note">' + esc(note) + '</div>' : '') + '</div>' +
+    '<div class="panel-tools">' + (controlsHtml||'') +
+    '<button class="btn ghost" type="button" data-png="' + key + '">导出 PNG</button></div></div>' +
+    '<div class="chart-wrap"><canvas class="chart" data-canvas="' + key + '"></canvas></div></div>';
+}
+
+function renderCharts(){
+  var ds = APP.ds, cols = ds.__cols;
+  var meta = ds.__meta;
+  var html = '';
+
+  var numCols = cols.filter(function(c){ return c.type==='number'; });
+  var catCols = cols.filter(function(c){ return c.type==='category'; });
+  var dateCols = cols.filter(function(c){ return c.type==='date'; });
+
+  // 字段透视
+  var focus = APP.focus || (catCols[0]? catCols[0].name : (numCols[0]? numCols[0].name : cols[0].name));
+  var focusCol = cols.filter(function(c){ return c.name===focus; })[0] || cols[0];
+  html += '<div id="focus-anchor" class="focus-note"><span>字段透视：</span><b>' + esc(focusCol.name) + '</b>' +
+    '<span class="cell-chip">' + TYPES[focusCol.type].label + '</span>' +
+    '<span>缺失 ' + fmtInt(focusCol.missing) + '，去重 ' + fmtInt(focusCol.distinct) + '</span></div>';
+  html += chartPanel('focus', '字段透视 · ' + focusCol.name, fieldNote(focusCol), '');
+
+  // 分类柱状图
+  if(catCols.length){
+    html += chartPanel('bar', '分类柱状图', '按类别频次降序，展示前 10 项', selectHtml('bar-select', catCols));
+  }
+  // 构成饼图
+  if(catCols.length){
+    html += chartPanel('pie', '构成饼图', '展示主要类别占比，其余合并为「其他」', selectHtml('pie-select', catCols));
+  }
+  // 直方图
+  if(numCols.length){
+    html += chartPanel('hist', '数值直方图', '琥珀虚线为均值位置', selectHtml('hist-select', numCols));
+  }
+  // 折线图
+  if(dateCols.length || numCols.length){
+    html += chartPanel('line', '折线趋势图',
+      dateCols.length ? '按日期聚合，展示随时间的变化' : '无日期字段，按行序展示数值变化',
+      dateCols.length ? selectHtml('line-select', dateCols) : selectHtml('line-metric', numCols));
+  }
+  // 散点图
+  if(numCols.length>=2){
+    html += chartPanel('scatter', '双数值散点图', '琥珀虚线为最小二乘趋势线',
+      '<select class="mini" id="scatter-x">' + numCols.map(function(c){ return '<option>'+esc(c.name)+'</option>'; }).join('') + '</select>' +
+      '<select class="mini" id="scatter-y">' + numCols.map(function(c, i){ return '<option'+(i===1?' selected':'')+'>'+esc(c.name)+'</option>'; }).join('') + '</select>');
+  }
+  // 热力图
+  if(numCols.length>=2){
+    html += chartPanel('heat', '数值相关性热力图', '皮尔逊相关系数矩阵，青色为正、琥珀为负', '');
+  }
+  if(!catCols.length && !numCols.length){
+    html = '<div class="panel"><div class="empty">当前数据集没有可绘制的数值或分类字段。</div></div>';
+  }
+  return html;
+}
+function fieldNote(col){
+  if(col.type==='number') return '均值 ' + fmtNum(col.mean) + '，中位数 ' + fmtNum(col.median) + '，范围 ' + fmtNum(col.min) + ' ~ ' + fmtNum(col.max);
+  if(col.type==='category') return col.distinct + ' 个类别，最高频「' + (col.top? col.top.key : '—') + '」占比 ' + fmtPct(col.topShare);
+  if(col.type==='date') return '日期范围 ' + new Date(col.minTime).toISOString().slice(0,10) + ' ~ ' + new Date(col.maxTime).toISOString().slice(0,10);
+  return '自由文本，去重 ' + col.distinct + ' 条';
+}
+function selectHtml(id, cols, selected){
+  return '<select class="mini" id="'+id+'">' + cols.map(function(c){
+    return '<option value="'+esc(c.name)+'"' + (c.name===selected?' selected':'') + '>'+esc(c.name)+'</option>';
+  }).join('') + '</select>';
+}
+
+function drawAllCharts(){
+  var ds = APP.ds, cols = ds.__cols;
+  var byName = {}; cols.forEach(function(c){ byName[c.name]=c; });
+  var numCols = cols.filter(function(c){ return c.type==='number'; });
+  var catCols = cols.filter(function(c){ return c.type==='category'; });
+  var dateCols = cols.filter(function(c){ return c.type==='date'; });
+
+  function canvasOf(key){ return $('[data-canvas="'+key+'"]'); }
+
+  // 字段透视
+  var focusName = APP.focus || (catCols[0]? catCols[0].name : (numCols[0]? numCols[0].name : cols[0].name));
+  var fc = byName[focusName] || cols[0];
+  var cv = canvasOf('focus');
+  if(cv) drawFieldChart(cv, fc);
+
+  var barSel = $('#bar-select');
+  if(barSel && canvasOf('bar')){
+    var c1 = byName[barSel.value];
+    drawBar(canvasOf('bar'), topItems(c1, 10));
+  }
+  var pieSel = $('#pie-select');
+  if(pieSel && canvasOf('pie')){ drawPie(canvasOf('pie'), pieItems(byName[pieSel.value])); }
+  var histSel = $('#hist-select');
+  if(histSel && canvasOf('hist')){ drawHistogram(canvasOf('hist'), byName[histSel.value]); }
+  var lineSel = $('#line-select');
+  if(canvasOf('line')){
+    if(lineSel){ drawLine(canvasOf('line'), dateSeries(ds, byName[lineSel.value]), '记录数', '日期'); }
+    else {
+      var mSel = $('#line-metric');
+      if(mSel){ drawLine(canvasOf('line'), rowSeries(ds, byName[mSel.value]), byName[mSel.value].name, '行序'); }
+    }
+  }
+  if(canvasOf('scatter')){
+    var sx = byName[($('#scatter-x')||{}).value] || numCols[0];
+    var sy = byName[($('#scatter-y')||{}).value] || numCols[1] || numCols[0];
+    var pts = scatterPoints(ds, sx.index, sy.index);
+    var r = pearson(pts.map(function(p){return p.x;}), pts.map(function(p){return p.y;}));
+    drawScatter(canvasOf('scatter'), pts, r, sx.name, sy.name);
+  }
+  if(canvasOf('heat')){
+    var labels = numCols.map(function(c){ return c.name; });
+    drawHeatmap(canvasOf('heat'), labels, correlationMatrix(ds, numCols));
+  }
+}
+function drawFieldChart(canvas, col){
+  if(col.type==='number'){ drawHistogram(canvas, col); return; }
+  if(col.type==='category'){ drawBar(canvas, topItems(col, 10)); return; }
+  if(col.type==='date'){
+    drawLine(canvas, dateSeries(APP.ds, col), '记录数', '日期'); return;
+  }
+  drawBar(canvas, topItems(col, 10));
+}
+function topItems(col, n){
+  if(!col || !col.freq) return [];
+  return col.freq.slice(0, n).map(function(f){ return { label:f.key, value:f.value }; });
+}
+function pieItems(col){
+  if(!col || !col.freq) return [];
+  var top = col.freq.slice(0, 6).map(function(f){ return { label:f.key, value:f.value }; });
+  var rest = col.freq.slice(6).reduce(function(a,b){ return a+b.value; }, 0);
+  if(rest>0) top.push({ label:'其他', value:rest });
+  return top;
+}
+function dateSeries(ds, dateCol){
+  var map = Object.create(null);
+  for(var i=0;i<ds.rows.length;i++){
+    var v = cleanCell(ds.rows[i][dateCol.index]);
+    if(v===null || !isDateStr(v)) continue;
+    var key = new Date(toDate(v).getTime()).toISOString().slice(0,10);
+    map[key] = (map[key]||0)+1;
+  }
+  return Object.keys(map).sort().map(function(k){ return { label:k, y:map[k] }; });
+}
+function rowSeries(ds, numCol){
+  var pts = [];
+  var limit = Math.min(ds.rows.length, 200);
+  for(var i=0;i<limit;i++){
+    var v = cleanCell(ds.rows[i][numCol.index]);
+    if(v===null || !isNumericStr(v)) continue;
+    pts.push({ label:'#'+(i+1), y:toNumber(v) });
+  }
+  return pts;
+}
+function scatterPoints(ds, i, j){
+  var pts = [];
+  for(var r=0;r<ds.rows.length;r++){
+    var a = cleanCell(ds.rows[r][i]), b = cleanCell(ds.rows[r][j]);
+    if(a===null||b===null) continue;
+    if(!isNumericStr(a) || !isNumericStr(b)) continue;
+    pts.push({ x:toNumber(a), y:toNumber(b) });
+  }
+  return pts;
+}
+
+/* ============================= 视图渲染 ============================= */
+function renderKPI(){
+  var ds = APP.ds, cols = ds.__cols, meta = ds.__meta;
+  var strip = $('#kpi-strip');
+  strip.innerHTML = [
+    kpiCard('数据行数', fmtInt(ds.rows.length), 'row', 'mono', 'accent'),
+    kpiCard('字段数量', fmtInt(cols.length), meta.typeSummary, 'mono', ''),
+    kpiCard('缺失率', fmtPct(meta.missingRate, 2), meta.missingCells + ' 个空值', 'mono', meta.missingRate>0?'amber':''),
+    kpiCard('重复行数', fmtInt(meta.dupCount), meta.dupCount? '占比 ' + fmtPct(ds.rows.length? meta.dupCount/ds.rows.length:0) : '无重复', 'mono', meta.dupCount?'amber':''),
+    kpiCard('洞察条数', fmtInt(APP.insights.length), meta.counts ? ('警告 '+meta.counts.warn+' · 注意 '+meta.counts.notice) : '', 'mono', 'accent')
+  ].join('');
+}
+function kpiCard(label, value, sub, cls, accent){
+  return '<div class="kpi ' + (accent==='accent'?'is-accent':(accent==='amber'?'is-amber':'')) + '">' +
+    '<div class="kpi-label">' + esc(label) + '</div>' +
+    '<div class="kpi-value ' + cls + '">' + esc(value) + '</div>' +
+    '<div class="kpi-sub">' + esc(sub||'') + '</div></div>';
+}
+
+function renderFieldList(){
+  var ds = APP.ds, cols = ds.__cols;
+  $('#field-count').textContent = cols.length;
+  var ul = $('#field-list');
+  ul.innerHTML = cols.map(function(c){
+    return '<li><button class="field-item" type="button" data-field="' + esc(c.name) + '" aria-current="' + (APP.focus===c.name?'true':'false') + '">' +
+      '<span class="type-dot ' + TYPES[c.type].cls + '" aria-hidden="true"></span>' +
+      '<span class="field-name" title="' + esc(c.name) + '">' + esc(c.name) + '</span>' +
+      '<span class="field-meta">' + TYPES[c.type].label + (c.missing? ' <span class="miss">·'+c.missing+'</span>' : '') + '</span>' +
+      '</button></li>';
+  }).join('');
+}
+
+function renderHeader(){
+  var ds = APP.ds;
+  $('#ds-name').textContent = ds.name;
+  $('#ds-shape').textContent = ds.rows.length + ' 行 × ' + ds.columns.length + ' 列';
+  $('#ds-enc').textContent = '字符集 ' + ds.encoding + ' · 分隔符 ' + (ds.delimiter||',');
+  $('#tab-insight-count').textContent = APP.insights.length;
+}
+
+function renderOverview(){
+  var ds = APP.ds, cols = ds.__cols, meta = ds.__meta;
+  var typeCount = { number:0, category:0, date:0, text:0 };
+  cols.forEach(function(c){ typeCount[c.type]++; });
+  var html = '';
+  html += '<div class="panel"><div class="panel-head"><div><div class="panel-title">数据快照</div>' +
+    '<div class="panel-note">' + esc(ds.name) + ' · 来源：' + esc(ds.source) + '</div></div></div>' +
+    '<div class="kpi-mini-grid">' +
+      miniStat(fmtInt(ds.rows.length), '记录行数', 'rows') +
+      miniStat(fmtInt(cols.length), '字段总数', 'columns') +
+      miniStat(fmtPct(meta.missingRate,2), '整体缺失率', meta.missingCells + ' 空值') +
+      miniStat(fmtInt(meta.dupCount), '重复行', '占 ' + fmtPct(ds.rows.length? meta.dupCount/ds.rows.length:0)) +
+    '</div></div>';
+
+  html += '<div class="panel"><div class="panel-head"><div><div class="panel-title">字段类型构成</div>' +
+    '<div class="panel-note">自动识别每个字段的类型与缺失数量</div></div></div>' +
+    '<div class="kpi-mini-grid">' +
+      miniStat(fmtInt(typeCount.number), '数值字段', 'numeric') +
+      miniStat(fmtInt(typeCount.category), '分类字段', 'categorical') +
+      miniStat(fmtInt(typeCount.date), '日期字段', 'datetime') +
+      miniStat(fmtInt(typeCount.text), '文本字段', 'free text') +
+    '</div></div>';
+
+  var numCols = cols.filter(function(c){ return c.type==='number'; });
+  if(numCols.length){
+    html += '<div class="panel"><div class="panel-head"><div><div class="panel-title">数值字段概览</div>' +
+      '<div class="panel-note">按字段罗列集中趋势与离散程度</div></div></div>' +
+      '<div class="table-scroll"><table class="data-table"><thead><tr>' +
+      ['字段','有效值','缺失','均值','中位数','标准差','最小值','最大值','离群点'].map(function(t){ return '<th>'+t+'</th>'; }).join('') +
+      '</tr></thead><tbody>' +
+      numCols.map(function(c){
+        return '<tr><td>' + esc(c.name) + '</td><td class="num">' + fmtInt(c.present) + '</td>' +
+          '<td class="num">' + fmtInt(c.missing) + '</td><td class="num">' + fmtNum(c.mean) + '</td>' +
+          '<td class="num">' + fmtNum(c.median) + '</td><td class="num">' + fmtNum(c.std) + '</td>' +
+          '<td class="num">' + fmtNum(c.min) + '</td><td class="num">' + fmtNum(c.max) + '</td>' +
+          '<td class="num">' + fmtInt(c.outliers) + '</td></tr>';
+      }).join('') + '</tbody></table></div></div>';
+  } else {
+    html += '<div class="panel"><div class="empty">未识别到数值字段，无法统计集中趋势与相关性。</div></div>';
+  }
+
+  var catCols = cols.filter(function(c){ return c.type==='category'; });
+  if(catCols.length){
+    html += '<div class="panel"><div class="panel-head"><div><div class="panel-title">分类字段概览</div>' +
+      '<div class="panel-note">类别数量与最高频类别</div></div></div>' +
+      '<div class="table-scroll"><table class="data-table"><thead><tr>' +
+      ['字段','类别数','最高频类别','频次','占比'].map(function(t){ return '<th>'+t+'</th>'; }).join('') +
+      '</tr></thead><tbody>' +
+      catCols.map(function(c){
+        return '<tr><td>' + esc(c.name) + '</td><td class="num">' + fmtInt(c.distinct) + '</td>' +
+          '<td><span class="cell-chip">' + esc(c.top? c.top.key : '—') + '</span></td>' +
+          '<td class="num">' + fmtInt(c.top? c.top.value : 0) + '</td>' +
+          '<td class="num">' + fmtPct(c.topShare) + '</td></tr>';
+      }).join('') + '</tbody></table></div></div>';
+  }
+
+  html += '<div class="panel"><div class="panel-head"><div><div class="panel-title">口径与隐私</div>' +
+    '<div class="panel-note">分析口径说明</div></div></div>' +
+    '<p style="margin:0;color:var(--text-2);font-size:13px;">所有解析、类型推断与统计均在当前浏览器内存中完成，' +
+    '数据不会上传至任何服务器。类型识别基于非空值的命中比例：数值 ≥90%、日期 ≥80% 判定为对应类型，' +
+    '其余按去重数量区分分类与文本。离群点采用 IQR 规则（低于 Q1−1.5·IQR 或高于 Q3+1.5·IQR）。' +
+    '相关性为成对完整的皮尔逊相关系数。刷新页面即回到内置示例数据，不保留任何草稿。</p></div>';
+  return html;
+}
+function miniStat(v, k, s){
+  return '<div class="mini-stat"><div class="v">' + esc(v) + '</div><div class="k">' + esc(k) + '</div><div class="s">' + esc(s||'') + '</div></div>';
+}
+
+function renderInsights(){
+  var counts = APP.ds.__meta.counts;
+  var order = { warn:0, notice:1, info:2 };
+  var sorted = APP.insights.slice().sort(function(a,b){ return order[a.level]-order[b.level]; });
+  var html = '';
+  html += '<div class="panel"><div class="panel-head"><div><div class="panel-title">自动洞察</div>' +
+    '<div class="panel-note">共 ' + APP.insights.length + ' 条 · 警告 ' + counts.warn + ' · 注意 ' + counts.notice + ' · 提示 ' + counts.info + '</div></div>' +
+    '<div class="panel-tools"><button class="btn ghost" type="button" id="btn-report-2">导出报告</button></div></div>' +
+    '<div class="kpi-mini-grid">' +
+      miniStat(fmtInt(counts.warn), '警告', '需优先处理') +
+      miniStat(fmtInt(counts.notice), '注意', '建议排查') +
+      miniStat(fmtInt(counts.info), '提示', '背景信息') +
+    '</div></div>';
+  if(!sorted.length){
+    html += '<div class="panel"><div class="empty">暂无自动洞察。</div></div>';
+  } else {
+    html += sorted.map(function(it){
+      var badge = it.level==='warn'?'警告':(it.level==='notice'?'注意':'提示');
+      return '<div class="insight lv-' + it.level + '"><span class="insight-badge">' + badge + '</span>' +
+        '<div><h4>' + esc(it.title) + '</h4><p>' + esc(it.text) + '</p></div></div>';
+    }).join('');
+  }
+  html += '<div class="panel"><div class="panel-head"><div><div class="panel-title">Markdown 报告预览</div>' +
+    '<div class="panel-note">若浏览器阻止下载，可在此选中文本手动复制</div></div></div>' +
+    '<pre class="report" id="report-preview">' + esc(buildMarkdown()) + '</pre></div>';
+  return html;
+}
+
+function renderData(){
+  var ds = APP.ds, cols = ds.__cols;
+  var limit = Math.min(ds.rows.length, 300);
+  var html = '<div class="panel"><div class="panel-head"><div><div class="panel-title">数据表预览</div>' +
+    '<div class="panel-note">显示前 ' + limit + ' 行 / 共 ' + ds.rows.length + ' 行，橙色为缺失值</div></div></div>' +
+    '<div class="table-scroll"><table class="data-table"><thead><tr>' +
+    cols.map(function(c){
+      return '<th>' + esc(c.name) + '<span class="th-badge">' + TYPES[c.type].label + '</span></th>';
+    }).join('') + '</tr></thead><tbody>';
+  for(var r=0;r<limit;r++){
+    html += '<tr>';
+    for(var c=0;c<cols.length;c++){
+      var v = ds.rows[r][c];
+      var cell = cleanCell(v);
+      if(cell===null){ html += '<td class="missing">∅</td>'; }
+      else if(cols[c].type==='number'){ html += '<td class="num">' + esc(cell) + '</td>'; }
+      else if(cols[c].type==='category'){ html += '<td><span class="cell-chip">' + esc(cell) + '</span></td>'; }
+      else { html += '<td>' + esc(cell) + '</td>'; }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div></div>';
+  return html;
+}
+
+function renderView(){
+  var v = $('#view');
+  var html = '';
+  if(APP.view==='overview') html = renderOverview();
+  else if(APP.view==='charts') html = renderCharts();
+  else if(APP.view==='insights') html = renderInsights();
+  else html = renderData();
+  v.innerHTML = html;
+  if(APP.view==='charts') drawAllCharts();
+}
+
+function renderAll(){
+  renderHeader();
+  renderKPI();
+  renderFieldList();
+  renderView();
+}
+
+/* ============================= 报告导出 ============================= */
+function buildMarkdown(){
+  var ds = APP.ds, cols = ds.__cols, meta = ds.__meta;
+  var L = [];
+  L.push('# 数据透镜 DataLens 分析报告');
+  L.push('');
+  L.push('- 数据集：' + ds.name);
+  L.push('- 数据来源：' + ds.source);
+  L.push('- 字符集：' + ds.encoding + '，分隔符：' + (ds.delimiter||','));
+  L.push('- 规模：' + ds.rows.length + ' 行 × ' + ds.columns.length + ' 列');
+  L.push('- 生成时间：' + new Date().toISOString().replace('T',' ').slice(0,19) + '（本机时间）');
+  L.push('- 处理方式：全部统计在浏览器本地完成，未上传服务器');
+  L.push('');
+  L.push('## 一、关键指标');
+  L.push('');
+  L.push('| 指标 | 数值 |');
+  L.push('| --- | --- |');
+  L.push('| 行数 | ' + fmtInt(ds.rows.length) + ' |');
+  L.push('| 字段数 | ' + fmtInt(cols.length) + ' |');
+  L.push('| 缺失单元格 | ' + fmtInt(meta.missingCells) + ' |');
+  L.push('| 缺失率 | ' + fmtPct(meta.missingRate,2) + ' |');
+  L.push('| 重复行数 | ' + fmtInt(meta.dupCount) + ' |');
+  L.push('| 洞察条数 | ' + fmtInt(APP.insights.length) + ' |');
+  L.push('');
+  L.push('## 二、字段字典');
+  L.push('');
+  L.push('| 字段 | 类型 | 有效值 | 缺失 | 去重数 |');
+  L.push('| --- | --- | --- | --- | --- |');
+  cols.forEach(function(c){
+    L.push('| ' + c.name + ' | ' + TYPES[c.type].label + ' | ' + fmtInt(c.present) + ' | ' + fmtInt(c.missing) + ' | ' + fmtInt(c.distinct) + ' |');
+  });
+  L.push('');
+  var numCols = cols.filter(function(c){ return c.type==='number'; });
+  if(numCols.length){
+    L.push('## 三、数值字段统计');
+    L.push('');
+    L.push('| 字段 | 均值 | 中位数 | 标准差 | 最小 | 最大 | 偏度 | 离群点 |');
+    L.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
+    numCols.forEach(function(c){
+      L.push('| ' + c.name + ' | ' + fmtNum(c.mean,2) + ' | ' + fmtNum(c.median,2) + ' | ' + fmtNum(c.std,2) + ' | ' +
+        fmtNum(c.min,2) + ' | ' + fmtNum(c.max,2) + ' | ' + c.skew.toFixed(2) + ' | ' + fmtInt(c.outliers) + ' |');
+    });
+    L.push('');
+    if(numCols.length>=2){
+      L.push('### 相关性矩阵（皮尔逊 r）');
+      L.push('');
+      L.push('| | ' + numCols.map(function(c){ return c.name; }).join(' | ') + ' |');
+      L.push('| --- |' + numCols.map(function(){ return ' --- |'; }).join(''));
+      var matrix = correlationMatrix(ds, numCols);
+      numCols.forEach(function(ci, i){
+        L.push('| ' + ci.name + ' | ' + numCols.map(function(cj, j){ return isFinite(matrix[i][j])? matrix[i][j].toFixed(2) : '—'; }).join(' | ') + ' |');
+      });
+      L.push('');
+    }
+  }
+  var catCols = cols.filter(function(c){ return c.type==='category'; });
+  if(catCols.length){
+    L.push('## 四、分类字段分布');
+    L.push('');
+    catCols.forEach(function(c){
+      L.push('### ' + c.name + '（' + c.distinct + ' 类）');
+      L.push('');
+      L.push('| 类别 | 频次 | 占比 |');
+      L.push('| --- | --- | --- |');
+      c.freq.slice(0,10).forEach(function(f){
+        L.push('| ' + f.key + ' | ' + fmtInt(f.value) + ' | ' + fmtPct(c.present? f.value/c.present:0) + ' |');
+      });
+      L.push('');
+    });
+  }
+  L.push('## 五、自动洞察');
+  L.push('');
+  var order = { warn:0, notice:1, info:2 };
+  var badge = { warn:'警告', notice:'注意', info:'提示' };
+  APP.insights.slice().sort(function(a,b){ return order[a.level]-order[b.level]; }).forEach(function(it){
+    L.push('- **[' + badge[it.level] + '] ' + it.title + '**：' + it.text);
+  });
+  L.push('');
+  L.push('---');
+  L.push('');
+  L.push('_报告由数据透镜 DataLens 自动生成，全部数据仅在本机浏览器内处理。_');
+  return L.join('\n');
+}
+
+function downloadBlob(blob, filename){
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+}
+function exportReport(){
+  if(!APP.ds){ toast('尚未载入数据'); return; }
+  var md = buildMarkdown();
+  downloadBlob(new Blob([md], { type:'text/markdown;charset=utf-8' }), 'DataLens-报告-' + safeName(APP.ds.name) + '.md');
+  toast('Markdown 报告已生成，若浏览器阻止下载，可在「洞察」页复制文本');
+}
+function safeName(s){ return String(s).replace(/[\\/:*?"<>|\s]+/g, '_').slice(0,40); }
+function exportPNG(key){
+  var canvas = $('[data-canvas="' + key + '"]');
+  if(!canvas){ toast('未找到该图表'); return; }
+  var url = canvas.toDataURL('image/png');
+  var bin = atob(url.split(',')[1]);
+  var arr = new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  downloadBlob(new Blob([arr], { type:'image/png' }), 'DataLens-' + key + '.png');
+  toast('图表 PNG 已导出');
+}
+
+/* ============================= Toast ============================= */
+function toast(msg){
+  var wrap = $('#toast-wrap');
+  var el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(function(){
+    el.style.opacity = '0';
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 220);
+  }, 3200);
+}
+
+/* ============================= 载入数据 ============================= */
+function loadDataset(ds, keepFocus){
+  ds = normalizeDataset(ds);
+  var cols = profile(ds);
+  var dupCount = countDuplicates(ds.rows);
+  var totalCells = ds.rows.length * ds.columns.length;
+  var missingCells = cols.reduce(function(a,c){ return a + c.missing; }, 0);
+  var typeCount = { number:0, category:0, date:0, text:0 };
+  cols.forEach(function(c){ typeCount[c.type]++; });
+  ds.__cols = cols;
+  ds.__meta = {
+    dupCount: dupCount,
+    missingCells: missingCells,
+    missingRate: totalCells? missingCells/totalCells : 0,
+    typeSummary: typeCount.number + ' 数值 · ' + typeCount.category + ' 分类 · ' + typeCount.date + ' 日期 · ' + typeCount.text + ' 文本',
+    counts: null
+  };
+  APP.ds = ds;
+  APP.insights = buildInsights(ds, cols, dupCount);
+  var counts = { warn:0, notice:0, info:0 };
+  APP.insights.forEach(function(i){ counts[i.level]++; });
+  ds.__meta.counts = counts;
+  if(!keepFocus || !cols.some(function(c){ return c.name===APP.focus; })) APP.focus = null;
+  renderAll();
+}
+function normalizeDataset(raw){
+  var columns = raw.columns.slice();
+  var rows = raw.rows.map(function(r){ return r.map(function(v){ return v==null? '' : String(v); }); });
+  return {
+    name: raw.name || '未命名数据集',
+    source: raw.source || '文件导入',
+    encoding: raw.encoding || '—',
+    delimiter: raw.delimiter || ',',
+    columns: columns,
+    rows: rows
+  };
+}
+
+/* ============================= 文件读取 ============================= */
+function handleFile(file){
+  if(!file) return;
+  file.arrayBuffer().then(function(buf){
+    var decoded = decodeBuffer(buf);
+    var ds = buildDataset(file.name.replace(/\.[^.]+$/, ''), '本地文件 · ' + file.name, decoded.encoding, decoded.text);
+    if(!ds || !ds.rows.length){ toast('文件为空或无法解析为表格数据'); return; }
+    APP.view = 'overview';
+    loadDataset(ds, false);
+    syncTabs();
+    toast('已载入 ' + file.name + '（' + decoded.encoding + '，' + ds.rows.length + ' 行）');
+  }).catch(function(err){
+    toast('读取文件失败：' + (err && err.message ? err.message : '未知错误'));
+  });
+}
+
+/* ============================= 事件绑定 ============================= */
+function syncTabs(){
+  $$('#tabs .tab').forEach(function(t){
+    t.setAttribute('aria-selected', String(t.getAttribute('data-view')===APP.view));
+  });
+  var active = $('#tabs .tab[aria-selected="true"]');
+  if(active) active.tabIndex = 0;
+  $$('#tabs .tab').forEach(function(t){ if(t!==active) t.tabIndex = -1; });
+}
+function switchView(v){
+  APP.view = v;
+  syncTabs();
+  renderView();
+  hideTooltip();
+}
+
+function bindGlobal(){
+  // 顶部示例数据
+  $('#sample-seg').addEventListener('click', function(ev){
+    var btn = ev.target.closest('.seg-btn');
+    if(!btn) return;
+    var key = btn.getAttribute('data-sample');
+    if(SAMPLES[key]){ APP.view='overview'; loadDataset(SAMPLES[key](), false); syncTabs(); toast('已载入内置示例：' + APP.ds.name); markSample(key); }
+  });
+  // 打开 CSV
+  $('#csv-input').addEventListener('change', function(ev){
+    var f = ev.target.files && ev.target.files[0];
+    handleFile(f);
+    ev.target.value = '';
+  });
+  // 导出报告
+  $('#btn-report').addEventListener('click', exportReport);
+  // 标签页
+  $('#tabs').addEventListener('click', function(ev){
+    var tab = ev.target.closest('.tab');
+    if(tab) switchView(tab.getAttribute('data-view'));
+  });
+  $('#tabs').addEventListener('keydown', function(ev){
+    var tabs = $$('#tabs .tab');
+    var idx = tabs.indexOf(document.activeElement);
+    if(idx<0) return;
+    if(ev.key==='ArrowRight' || ev.key==='ArrowLeft'){
+      ev.preventDefault();
+      var next = (idx + (ev.key==='ArrowRight'?1:tabs.length-1)) % tabs.length;
+      tabs[next].focus();
+      switchView(tabs[next].getAttribute('data-view'));
+    }
+  });
+  // 字段列表
+  $('#field-list').addEventListener('click', function(ev){
+    var btn = ev.target.closest('.field-item');
+    if(btn) focusField(btn.getAttribute('data-field'));
+  });
+  // 视图内交互（事件委托）
+  $('#view').addEventListener('click', function(ev){
+    var fieldBtn = ev.target.closest('[data-field-jump]');
+    if(fieldBtn){ focusField(fieldBtn.getAttribute('data-field-jump')); return; }
+    var png = ev.target.closest('[data-png]');
+    if(png){ exportPNG(png.getAttribute('data-png')); return; }
+    if(ev.target.closest('#btn-report-2')){ exportReport(); return; }
+  });
+  $('#view').addEventListener('change', function(ev){
+    if(ev.target.tagName==='SELECT'){ drawAllCharts(); }
+  });
+  var rt;
+  window.addEventListener('resize', function(){
+    clearTimeout(rt);
+    rt = setTimeout(function(){ if(APP.view==='charts') drawAllCharts(); }, 120);
+  });
+}
+function markSample(key){
+  $$('#sample-seg .seg-btn').forEach(function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-sample')===key));
+  });
+}
+function focusField(name){
+  APP.focus = name;
+  $$('#field-list .field-item').forEach(function(b){
+    b.setAttribute('aria-current', String(b.getAttribute('data-field')===name));
+  });
+  APP.view = 'charts';
+  syncTabs();
+  renderView();
+  var anchor = $('#focus-anchor');
+  if(anchor){
+    anchor.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+  var col = APP.ds.__cols.filter(function(c){ return c.name===name; })[0];
+  toast('已切换到字段「' + name + '」的图表视图' + (col? '（' + TYPES[col.type].label + '）' : ''));
+}
+
+/* ============================= 初始化 ============================= */
+function init(){
+  APP.insights = [];
+  loadDataset(SAMPLES.grades(), false);
+  markSample('grades');
+  APP.view = 'overview';
+  syncTabs();
+  bindGlobal();
+  // 记录初始行高，保证首次绘制尺寸正确
+  setTimeout(function(){ if(APP.view==='charts') drawAllCharts(); }, 60);
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+
+})();
+</script>
+</body>
+</html>
